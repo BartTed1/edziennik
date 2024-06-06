@@ -103,7 +103,7 @@ export default function Konta() {
 				<form action="">
 					{
 						classes === null ? <div>Ładowanie listy klas...</div> : newUsersList.map((user, index) => (
-							<NewUserFormElements classes={classes} key={index}/>
+							<NewUserFormElements classes={classes} key={index} user={user} modifyCallback={setNewUsersList}/>
 						))
 					}
 				</form>
@@ -243,12 +243,32 @@ function Navigation({
 	)
 }
 
-function NewUserFormElements({classes} : {classes: Class[]}) {
+function NewUserFormElements({classes, user, key, modifyCallback} : {classes: Class[], user: User, key: number, modifyCallback: Dispatch<SetStateAction<User[]>>}) {
+	const [role, setRole] = useState("");
+	const [classId, setClassId] = useState(0);
+	const [name, setName] = useState("");
+	const [surname, setSurname] = useState("");
+
+	useEffect(() => {
+		setRole(user.role);
+		setClassId(user.studentclass?.id || 0);
+		setName(user.imie);
+		setSurname(user.nazwisko);
+	}, [user])
+
+	useEffect(() => {
+		modifyCallback(prevState => {
+			const newState = [...prevState];
+			newState[key] = new User(0, role, name, surname, "", null, classId ? classes.find(c => c.id === classId) : null);
+			return newState;
+		})
+	}, [role, classId, name, surname, modifyCallback, key, classes])
+
 	return (
 		<div className="button-set">
 			<div>
 				<label htmlFor="">Typ konta:</label>
-				<select className={"first"}>
+				<select className={"first"} value={role} onChange={(e) => setRole(e.target.value)}>
 					<option disabled={true} hidden={true} value="">Wybierz</option>
 					<option value="STUDENT">Uczeń</option>
 					<option value="TEACHER">Nauczyciel</option>
@@ -257,7 +277,7 @@ function NewUserFormElements({classes} : {classes: Class[]}) {
 			<div>
 				<div>
 					<label htmlFor="class">Klasa:</label>
-					<select id={"class"}>
+					<select id={"class"} value={classId} onChange={e => setClassId(parseInt(e.target.value))}>
 						{
 							classes?.map((c, index) => (
 								<option key={index} value={c.id}>{c.name}</option>
@@ -268,11 +288,11 @@ function NewUserFormElements({classes} : {classes: Class[]}) {
 			</div>
 			<div>
 				<label htmlFor="name">Imie:</label>
-				<input type="text" id={"name"}/>
+				<input type="text" id={"name"} value={name} onChange={(e) => setName(e.target.value)}/>
 			</div>
 			<div>
 				<label htmlFor="surname">Nazwisko:</label>
-				<input type="text" id={"surname"} className={"last"}/>
+				<input type="text" id={"surname"} className={"last"} value={surname} onChange={(e) => setSurname(e.target.value)}/>
 			</div>
 		</div>
 	)
