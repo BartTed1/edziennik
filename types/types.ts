@@ -2,7 +2,9 @@ export enum UserType {
     ADMIN = 'admin',
     TEACHER = 'teacher',
     USER = 'user',
-    LOGGEDOFF = 'loggedoff'
+    STUDENT = 'student',
+    PARENT = 'parent',
+    UNDEFINED = 'undefined',
 }
 
 export enum InputType {

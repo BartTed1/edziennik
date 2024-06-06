@@ -1,10 +1,20 @@
+@import @/global
+
 .header
   width: 100%
-  height: 70px
+  height: $headerHeight
   display: flex
   justify-content: space-between
   gap: 20px
   padding: 20px
+  background: $background
+  position: sticky
+  top: 0
+  margin-bottom: 10px
+  transition-duration: 200ms
+  &--scrolled
+    border-bottom: 1px solid $stroke
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)
   &__nav
     display: flex
     gap: 2px
@@ -20,3 +30,4 @@
     display: flex
     gap: 10px
     align-items: center
+    // TODO("Add shadow or border bottom when not on top")

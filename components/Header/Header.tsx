@@ -13,7 +13,7 @@ import kontaOutlined from "@/assets/icons/outlined/konta.svg"
 import kontaFilled from "@/assets/icons/filled/konta.svg"
 import klasyOutlined from "@/assets/icons/outlined/klasy.svg"
 import klasyFilled from "@/assets/icons/filled/klasy.svg"
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Link from "next/link";
 
 
@@ -22,6 +22,7 @@ function Header() {
 	const [role, setRole] = useState("")
 	const [name, setName] = useState("")
 	const [surname, setSurname] = useState("")
+	const headerRef = useRef<HTMLElement | null>(null)
 
 	useEffect(() => {
 		if (typeof window === 'undefined') return
@@ -34,11 +35,25 @@ function Header() {
 		setName(localStorage.getItem("imie") || "Użytkownik")
 		setSurname(localStorage.getItem("nazwisko") || "")
 
+		handleScroll()
+		window.addEventListener("scroll", handleScroll)
+		return () => window.removeEventListener("scroll", handleScroll)
 	}, [])
+
+	function handleScroll() {
+		const header = headerRef.current
+		if (header) {
+			if (window.scrollY > 0) {
+				header.classList.add("header--scrolled");
+			} else {
+				header.classList.remove("header--scrolled");
+			}
+		}
+	}
 
 
   return (
-		<header className="header">
+		<header className="header" ref={headerRef}>
 			<Link href={"/dziennik"} onClick={() => setActiveMenu("Home")} className="header__logo">
 				<img src="" alt="eDziennik"/>
 			</Link>

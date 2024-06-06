@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import {usePathname, useRouter} from "next/navigation";
+import {UserType} from "@/types/types";
 
-function useRole(role: string): boolean {
-	const [isRole, setIsRole] = useState(null);
+function useRole(role: UserType): boolean | null {
+	const [isRole, setIsRole] = useState<boolean | null>(null);
 	const router = useRouter();
-	const pathname = usePathname();
 
 	useEffect(() => {
 		if (typeof window === 'undefined') return;
-		const storedRole = localStorage.getItem('role');
+		const storedRole = (localStorage.getItem("role") || "undefined") as UserType;
 		setIsRole(storedRole === role);
-
-	}, [pathname, role, router]);
+	}, [role, router]);
 
 	return isRole;
 }

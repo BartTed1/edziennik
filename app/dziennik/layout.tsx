@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import React from "react";
 import "@/global.sass";
 import Header from "@/components/Header/Header";
+import AuthWrapper from "@/components/AuthWrapper/AuthWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,9 +13,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-      <Header />
-      <main>{children}</main>
-    </>
+    <html lang="pl">
+      <body className={inter.className}>
+        <AuthWrapper>
+          <Header />
+          <main>{children}</main>
+        </AuthWrapper>
+      </body>
+    </html>
   );
 }

@@ -13,11 +13,6 @@ function AuthWrapper({ children }: Readonly<{ children: React.ReactNode }>){
 
 	useEffect(() => {
 		watchAuth()
-		window.addEventListener("storage", watchAuth)
-
-		return () => {
-			window.removeEventListener("storage", watchAuth)
-		}
 	}, [])
 
 	return (

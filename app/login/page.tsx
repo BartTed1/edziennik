@@ -2,7 +2,7 @@
 
 import "./Login.sass"
 import Input from "@/components/Input/Input"
-import {ButtonType, Icons, InputType} from "@/types/types"
+import {ButtonType, Icons, InputType, UserType} from "@/types/types"
 import Button from "@/components/Button/Button"
 import React, {useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
@@ -18,32 +18,38 @@ export default function Login() {
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		setLogging(true);
-		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				login,
-				password
+
+		try {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					login,
+					password
+				})
 			})
-		})
-		if (response.status === 403) {
-			setResponse("Niepoprawne dane logowania");
-			setLogging(false);
-			return;
+			if (response.status === 403) {
+				setResponse("Niepoprawne dane logowania");
+				setLogging(false);
+				return;
+			}
+			const data = await response.json();
+			const token = data.token.split(".")[1];
+			const decoded = JSON.parse(atob(token));
+			const { sub, iat, exp } = decoded;
+			localStorage.setItem("token", data.token);
+			localStorage.setItem("role", sub as UserType);
+			localStorage.setItem("iat", iat);
+			localStorage.setItem("exp", exp);
+			localStorage.setItem("imie", data.user.imie);
+			localStorage.setItem("nazwisko", data.user.nazwisko);
+			window.location.href = redirectTo ? redirectTo : "/dziennik";
+		} catch (e) {
+			setLogging(true);
+			setResponse("Błąd serwera");
 		}
-		const data = await response.json();
-		const token = data.token.split(".")[1];
-		const decoded = JSON.parse(atob(token));
-		const { sub, iat, exp } = decoded;
-		localStorage.setItem("token", data.token);
-		localStorage.setItem("role", sub);
-		localStorage.setItem("iat", iat);
-		localStorage.setItem("exp", exp);
-		localStorage.setItem("imie", data.user.imie);
-		localStorage.setItem("nazwisko", data.user.nazwisko);
-		window.location.href = redirectTo ? redirectTo : "/dziennik";
 	}
 
 	useEffect(() => {

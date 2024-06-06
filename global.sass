@@ -1,10 +1,130 @@
 *::before, *::after, *
   box-sizing: border-box
 
+// colors
 $background: #FCFAF8
 $primary: #67CBAB
 $primaryDark: #3D7D63
+$stroke: #CECBC8
+$tint: #E1F2E1
+$onBackground: #000000
+
+// sizes
+$headerHeight: 70px
 
 body, html
   margin: 0
   padding: 0
+  background: $background
+
+button
+  font-family: 'Inter', sans-serif
+
+main
+  width: 100%
+  padding: 20px
+  min-height: calc(100dvh - #{$headerHeight} - 10px)
+  display: flex
+  justify-content: center
+  align-items: flex-start
+
+.container
+  max-width: 1200px
+  width: 100%
+  margin: 0 auto
+  padding: 20px
+  border: 1px solid $stroke
+  border-radius: 20px
+  background: #FFFFFF
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)
+  display: flex
+  flex-direction: column
+  gap: 20px
+  h1, p
+    margin: 0
+
+button, select, input
+  border: 1px solid $stroke
+  padding: 5px 10px
+  background: $background
+  cursor: pointer
+  border-radius: 10px
+  height: 30px
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 5px
+  min-width: 60px
+  transition-duration: 100ms
+  &:not(:disabled):hover
+    background: $tint
+    border: 1px solid darken($tint, 60%)
+  &:disabled
+    opacity: 0.5
+    cursor: not-allowed
+
+input
+  &:not(:disabled):hover
+    border: 1px solid darken($tint, 60%)
+    background: $background
+  &:focus
+    outline: 2px solid $tint
+
+.primary
+  background: $primary
+  border: 1px solid darken($tint, 60%)
+  color: $onBackground
+  &:not(:disabled):hover
+    background: lighten($primary, 10%)
+
+.button-set
+  display: flex
+  gap: 1px
+  button, select, input
+    border-radius: 2px
+  button:first-child, .first
+    border-top-left-radius: 10px
+    border-bottom-left-radius: 10px
+  button:last-child, .last
+    border-top-right-radius: 10px
+    border-bottom-right-radius: 10px
+  .only
+    border-radius: 10px
+  svg
+    transform: translateY(-1px) scale(0.8)
+  label
+    font-size: 0.8rem
+    color: $onBackground
+    margin-left: 4px
+
+.table__wrapper
+  overflow: hidden
+  width: 100%
+  border-radius: 10px
+  border: 1px solid $stroke
+
+.table
+  width: 100%
+  border-collapse: collapse
+  overflow: hidden
+
+  td
+    padding: 2px 5px
+  td, th
+    border: 1px solid $stroke
+  th
+    padding: 5px
+    text-transform: uppercase
+    border-top: none
+  tr:nth-child(2n)
+    background: $background
+  tr td:last-child, tr th:last-child
+    border-right: none
+  tr td:first-child, tr th:first-child
+    border-left: none
+  tr:last-child td
+    border-bottom: none
+  tbody tr:hover
+    background: desaturate(lighten($tint, 4%), 30%)
+  &__tint
+    background: $tint

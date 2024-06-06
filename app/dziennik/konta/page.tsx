@@ -2,21 +2,24 @@
 
 import usePermission from "@/utils/useRole";
 import useRole from "@/utils/useRole";
+import {UserType} from "@/types/types";
+import Konta from "./konta";
 
 export default function Page() {
-	const isValidRole = useRole("admin")
+	const isValidRole = useRole(UserType.ADMIN)
 
 	return (
-		<div>
+		<>
 			{
 				isValidRole ? (
-					<h1>Admins</h1>
-				) : !isValidRole ? (
-					<h1>Not an admin</h1>
-				) : (
+					<Konta />
+					) :
+				isValidRole === null ? (
 					<></>
+					) : (
+					<h1>Unauthorized</h1>
 				)
 			}
-		</div>
+		</>
 	);
 }
