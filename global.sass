@@ -12,6 +12,8 @@ $error: #FE6D73
 
 // sizes
 $headerHeight: 70px
+$paddingLarge: 20px
+$paddingSmall: 10px
 
 body, html
   margin: 0
@@ -23,17 +25,18 @@ button
 
 main
   width: 100%
-  padding: 20px
   min-height: calc(100dvh - #{$headerHeight} - 10px)
   display: flex
   justify-content: center
   align-items: flex-start
+  padding: $paddingLarge
+  @media (width < 700px)
+    padding: $paddingSmall
 
 .container
   max-width: 1200px
   width: 100%
   margin: 0 auto
-  padding: 20px
   border: 1px solid $stroke
   border-radius: 20px
   background: #FFFFFF
@@ -41,10 +44,13 @@ main
   display: flex
   flex-direction: column
   gap: 20px
+  padding: $paddingLarge
+  @media (width < 700px)
+    padding: $paddingSmall
   h1, p
     margin: 0
 
-button, select, input
+.button, .select, .input
   border: 1px solid $stroke
   padding: 5px 10px
   background: $background
@@ -128,7 +134,7 @@ input
 
 
 .table__wrapper
-  overflow: hidden
+  overflow: auto
   width: 100%
   border-radius: 10px
   border: 1px solid $stroke
@@ -136,7 +142,6 @@ input
 .table
   width: 100%
   border-collapse: collapse
-  overflow: hidden
 
   td
     padding: 2px 5px

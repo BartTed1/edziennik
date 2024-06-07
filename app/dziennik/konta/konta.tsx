@@ -192,8 +192,8 @@ export default function Konta() {
 
 				<div className="navigation">
 					<div className="button-set">
-						<button onClick={addAccount}>Dodaj następne konto</button>
-						<button className={"primary"} onClick={saveNewAccounts} disabled={
+						<button className={"button"} onClick={addAccount}>Dodaj następne konto</button>
+						<button className={"button primary"} onClick={saveNewAccounts} disabled={
 							isAddModalDisabled ||
 							classes === null ||
 							newUsersList.some(user => user.user.role === "" || user.user.imie === "" || user.user.nazwisko === "")
@@ -283,14 +283,14 @@ function Navigation({
 	return (
 		<div className="navigation">
 			<div className="button-set">
-				<button onClick={() => setIsModalOpened(true)}>Dodaj konto/a</button>
+				<button className={"button"} onClick={() => setIsModalOpened(true)}>Dodaj konto/a</button>
 			</div>
 			<div className="button-set">
 				<div>
 					<label htmlFor="filter">
 						Typ konta:
 					</label>
-					<select id={"filter"} className={"only"} value={role} onChange={(e) => {
+					<select id={"filter"} className={"select only"} value={role} onChange={(e) => {
 						setRole(e.target.value)
 					}}>
 						<option value="">Wszyscy</option>
@@ -302,7 +302,7 @@ function Navigation({
 				</div>
 			</div>
 			<div className="button-set navigation__pages">
-					<button disabled={page <= 0} onClick={() => {
+					<button className={"button"} disabled={page <= 0} onClick={() => {
 						setPage(prevState => prevState - 1)
 					}}>
 						<svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -313,7 +313,7 @@ function Navigation({
 				<p className={"info"}>
 					{page + 1}
 				</p>
-				<button disabled={isNull} onClick={() => {
+				<button className={"button"} disabled={isNull} onClick={() => {
 					setPage(prevState => prevState + 1)
 				}}>
 					Następna
@@ -381,7 +381,7 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 			</div>
 			<div>
 				{index === 0 && <label htmlFor="">Typ konta:</label>}
-				<select className={"first"} value={role} onChange={(e) => setRole(e.target.value)}>
+				<select className={"select first"} value={role} onChange={(e) => setRole(e.target.value)}>
 					<option disabled={true} hidden={true} value="">Wybierz</option>
 					<option value="STUDENT">Uczeń</option>
 					<option value="TEACHER">Nauczyciel</option>
@@ -390,7 +390,7 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 			<div>
 				<div>
 					{index === 0 && <label htmlFor="class">Klasa:</label>}
-					<select id={"class"} value={classId} onChange={e => setClassId(parseInt(e.target.value))}>
+					<select className={"select"} id={"class"} value={classId} onChange={e => setClassId(parseInt(e.target.value))}>
 						<option value="null">-</option>
 						{
 							classes?.map((c, index) => (
@@ -402,15 +402,15 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 			</div>
 			<div>
 				{index === 0 && <label htmlFor="name">Imie:</label>}
-				<input type="text" id={"name"} value={name} onChange={(e) => setName(e.target.value)}/>
+				<input className={"input"} type="text" id={"name"} value={name} onChange={(e) => setName(e.target.value)}/>
 			</div>
 			<div>
 				{index === 0 && <label htmlFor="surname">Nazwisko:</label>}
-				<input type="text" id={"surname"} value={surname} onChange={(e) => setSurname(e.target.value)}/>
+				<input className={"input"} type="text" id={"surname"} value={surname} onChange={(e) => setSurname(e.target.value)}/>
 			</div>
 			<div>
 				{index === 0 && <label htmlFor="actions">Akcje:</label>}
-				<button className={"last error"} onClick={removeUser} disabled={userListLength <= 1}>Usuń</button>
+				<button className={"button last error"} onClick={removeUser} disabled={userListLength <= 1}>Usuń</button>
 			</div>
 		</div>
 	)
