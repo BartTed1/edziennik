@@ -8,7 +8,8 @@ class User {
 		public supervisingClass: any = null,
 		public studentclass: any = null,
 		public subjects: any[] | null = null,
-		public grades: any[] | null = null
+		public grades: any[] | null = null,
+		public password: string | null = null
 	) {
 		this.id = id;
 		this.role = role;
@@ -19,10 +20,11 @@ class User {
 		this.studentclass = studentclass;
 		this.subjects = subjects;
 		this.grades = grades;
+		this.password = password;
 	}
 
-	static empty() {
-		return new User(0, "", "", "", "");
+	static empty(id: number = 0) {
+		return new User(id, "", "", "", "");
 	}
 }
 

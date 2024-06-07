@@ -1,8 +1,15 @@
 import "./konta.sass";
-import {Dispatch, SetStateAction, useEffect, useRef, useState} from "react";
+import React, {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from "react";
 import {usePathname, useSearchParams, useRouter} from "next/navigation";
 import Class from "@/classes/Class";
 import User from "@/classes/User";
+import {remove} from "immutable";
+import {create} from "node:domain";
+
+interface UserWrapper {
+	tempId: number;
+	user: User;
+}
 
 export default function Konta() {
 	const [accounts, setAccounts] = useState<User[] | null>(null);
@@ -13,41 +20,27 @@ export default function Konta() {
 	const [isAddModalOpened, setIsAddModalOpened] = useState(false);
 	const addModalRef = useRef<HTMLDialogElement | null>(null);
 	const [classes, setClasses] = useState<Class[] | null>(null);
-	const [newUsersList, setNewUsersList] = useState<User[]>([User.empty()]);
+	const [newUsersList, setNewUsersList] = useState<UserWrapper[]>([{tempId: 0, user: User.empty()}]);
 	const router = useRouter();
+	const [isAddModalDisabled, setIsAddModalDisabled] = useState(false);
 
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		const page = parseInt(params.get("page") || "0");
-		const role = params.get("role") || "";
+	const fetchClasses = useCallback(async () => {
+		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/class`, {
+			headers: {
+				"Authorization": `Bearer ${localStorage.getItem("token")}`
+			}
+		})
+		if (response.status === 403) {
+			localStorage.clear();
+			window.location.href = "/login";
+		}
+		const data = await response.json();
+		if (data) {
+			setClasses(data.content);
+		}
+	}, [])
 
-		setPage(page);
-		setRole(role);
-
-		fetchAccounts();
-		fetchClasses();
-	}, [params])
-
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		const current = new URLSearchParams(Array.from(params.entries()));
-		current.set("page", page.toString());
-		if (role) current.set("role", role);
-		const search = current.toString();
-		router.push(`${pathname}?${search}`);
-		setAccounts(null);
-		fetchAccounts();
-	}, [page, params, pathname, role, router])
-
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		const modal = addModalRef.current;
-		if (!modal) return;
-		if (isAddModalOpened) modal.showModal()
-		else modal.close();
-	}, [isAddModalOpened])
-
-	async function fetchAccounts() {
+	const fetchAccounts = useCallback(async () => {
 		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user?
 			${role ? `role=${role}&` : ""}
 			&page=${page}`, {
@@ -63,26 +56,111 @@ export default function Konta() {
 		if (data) {
 			setAccounts(data.content);
 		}
+	}, [page, role])
+
+	const saveNewAccounts = async () => {
+		const requestedUsers = newUsersList.map(wrapper => {
+			const user = wrapper.user;
+			return {
+				role: user.role,
+				imie: user.imie,
+				nazwisko: user.nazwisko,
+				studentclass: user.studentclass ? {id: user.studentclass.id} : null,
+				supervisingClass: user.supervisingClass ? {id: user.supervisingClass.id} : null
+			}
+		});
+
+		try {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/registerList`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${localStorage.getItem("token")}`
+				},
+				body: JSON.stringify(requestedUsers)
+			})
+			if (response.status === 403) {
+				localStorage.clear();
+				window.location.href = "/login";
+			}
+			const data = await response.json();
+			if (data) {
+				createAndDownloadCredentialListTxt(data);
+			}
+		} catch (e) {
+			console.error(e);
+		}
 	}
 
-	async function fetchClasses() {
-		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/class`, {
-			headers: {
-				"Authorization": `Bearer ${localStorage.getItem("token")}`
-			}
-		})
-		if (response.status === 403) {
-			localStorage.clear();
-			window.location.href = "/login";
-		}
-		const data = await response.json();
-		if (data) {
-			setClasses(data.content);
-		}
+	const createAndDownloadCredentialListTxt = (data: Array<User>) => {
+		const formattedData = data.map((user: User) => {
+			const columns = [
+				{ label: 'Imię', value: user.imie },
+				{ label: 'Nazwisko', value: user.nazwisko },
+				{ label: 'Typ konta', value: user.role },
+				{ label: 'Login', value: user.login },
+				{ label: 'Hasło', value: user.password },
+			];
+
+			const longestValueLength = Math.max(...columns.map(column => column.value ? column.value.length : 0));
+
+			const box = columns.map(column => {
+				const paddedLabel = column.label.padEnd(longestValueLength, ' ');
+				const paddedValue = column.value ? column.value.padEnd(longestValueLength, ' ') : '-'.repeat(longestValueLength);
+				return `| ${paddedLabel} | ${paddedValue} |`;
+			});
+
+			return [
+				'+-' + "edziennik".padEnd(longestValueLength, "-") + '-+-' + '-'.repeat(longestValueLength) + '-+',
+				...box,
+				'+-' + '-'.repeat(longestValueLength) + '-+-' + '-'.repeat(longestValueLength) + '-+',
+				'\n'
+			].join('\n');
+		});
+
+		const blob = new Blob([formattedData.join("")], {type: "text/plain"});
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = "lista_kont.txt";
+		a.click();
+		URL.revokeObjectURL(url);
 	}
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		const page = parseInt(params.get("page") || "0");
+		const role = params.get("role") || "";
+
+		setPage(page);
+		setRole(role);
+
+		fetchAccounts();
+		fetchClasses();
+	}, [params, fetchClasses])
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		const current = new URLSearchParams(Array.from(params.entries()));
+		current.set("page", page.toString());
+		if (role) current.set("role", role);
+		const search = current.toString();
+		if (!search.length) return;
+		router.push(`${pathname}?${search}`);
+		setAccounts(null);
+		fetchAccounts();
+	}, [page, params, pathname, role, router])
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		const modal = addModalRef.current;
+		if (!modal) return;
+		if (isAddModalOpened) modal.showModal()
+		else modal.close();
+	}, [isAddModalOpened])
 
 	async function addAccount() {
-
+		setNewUsersList(prevState => [...prevState, {tempId: Math.random(), user: User.empty()}])
 	}
 
 	return (
@@ -103,7 +181,7 @@ export default function Konta() {
 				<form action="">
 					{
 						classes === null ? <div>Ładowanie listy klas...</div> : newUsersList.map((user, index) => (
-							<NewUserFormElements classes={classes} key={index} user={user} modifyCallback={setNewUsersList}/>
+							<NewUserFormElements classes={classes} key={user.tempId} index={index} user={user} modifyCallback={setNewUsersList} userListLength={newUsersList.length}/>
 						))
 					}
 				</form>
@@ -111,7 +189,7 @@ export default function Konta() {
 				<div className="navigation">
 					<div className="button-set">
 						<button onClick={addAccount}>Dodaj następne konto</button>
-						<button className={"primary"}>Zapisz</button>
+						<button className={"primary"} onClick={saveNewAccounts} disabled={isAddModalDisabled}>Zapisz</button>
 					</div>
 				</div>
 			</dialog>
@@ -243,31 +321,61 @@ function Navigation({
 	)
 }
 
-function NewUserFormElements({classes, user, key, modifyCallback} : {classes: Class[], user: User, key: number, modifyCallback: Dispatch<SetStateAction<User[]>>}) {
+function NewUserFormElements({classes, user, index, modifyCallback, userListLength} : {classes: Class[], user: UserWrapper, index: number, modifyCallback: Dispatch<SetStateAction<UserWrapper[]>>, userListLength: number}) {
 	const [role, setRole] = useState("");
 	const [classId, setClassId] = useState(0);
 	const [name, setName] = useState("");
 	const [surname, setSurname] = useState("");
 
 	useEffect(() => {
-		setRole(user.role);
-		setClassId(user.studentclass?.id || 0);
-		setName(user.imie);
-		setSurname(user.nazwisko);
-	}, [user])
+		setRole(user.user.role);
+		setClassId(user.user.studentclass?.id || 0);
+		setName(user.user.imie);
+		setSurname(user.user.nazwisko);
+	}, [])
 
 	useEffect(() => {
+		updateUser();
+
+	}, [role, classId, name, surname, modifyCallback, index, classes])
+
+	function updateUser() {
+		console.log("changing:", user.tempId, role, classId, name, surname)
 		modifyCallback(prevState => {
 			const newState = [...prevState];
-			newState[key] = new User(0, role, name, surname, "", null, classId ? classes.find(c => c.id === classId) : null);
+			newState.forEach((wrapper, i) => {
+				if (wrapper.tempId === user.tempId) {
+					wrapper.user.role = role;
+					if (role === "STUDENT") {
+						wrapper.user.supervisingClass = null;
+						wrapper.user.studentclass = classes.find(c => c.id === classId) || null;
+					}
+					else if (role === "TEACHER") {
+						wrapper.user.studentclass = null;
+						wrapper.user.supervisingClass = classes.find(c => c.id === classId) || null;
+					}
+					wrapper.user.imie = name;
+					wrapper.user.nazwisko = surname;
+				}
+			});
 			return newState;
 		})
-	}, [role, classId, name, surname, modifyCallback, key, classes])
+	}
+
+	function removeUser(e: React.MouseEvent<HTMLButtonElement>) {
+		e.preventDefault()
+		console.log("removing:", user.tempId)
+		modifyCallback(prevState => prevState.filter((wrapper) => wrapper.tempId !== user.tempId))
+	}
 
 	return (
-		<div className="button-set">
+		<div className="button-set" data-user-id={user.tempId}>
 			<div>
-				<label htmlFor="">Typ konta:</label>
+				{index === 0 && <label htmlFor="Lp.">Lp.</label>}
+				<p id={"lp"}>{index + 1}</p>
+			</div>
+			<div>
+				{index === 0 && <label htmlFor="">Typ konta:</label>}
 				<select className={"first"} value={role} onChange={(e) => setRole(e.target.value)}>
 					<option disabled={true} hidden={true} value="">Wybierz</option>
 					<option value="STUDENT">Uczeń</option>
@@ -276,8 +384,9 @@ function NewUserFormElements({classes, user, key, modifyCallback} : {classes: Cl
 			</div>
 			<div>
 				<div>
-					<label htmlFor="class">Klasa:</label>
+					{index === 0 && <label htmlFor="class">Klasa:</label>}
 					<select id={"class"} value={classId} onChange={e => setClassId(parseInt(e.target.value))}>
+						<option value="null">-</option>
 						{
 							classes?.map((c, index) => (
 								<option key={index} value={c.id}>{c.name}</option>
@@ -287,12 +396,16 @@ function NewUserFormElements({classes, user, key, modifyCallback} : {classes: Cl
 				</div>
 			</div>
 			<div>
-				<label htmlFor="name">Imie:</label>
+				{index === 0 && <label htmlFor="name">Imie:</label>}
 				<input type="text" id={"name"} value={name} onChange={(e) => setName(e.target.value)}/>
 			</div>
 			<div>
-				<label htmlFor="surname">Nazwisko:</label>
-				<input type="text" id={"surname"} className={"last"} value={surname} onChange={(e) => setSurname(e.target.value)}/>
+				{index === 0 && <label htmlFor="surname">Nazwisko:</label>}
+				<input type="text" id={"surname"} value={surname} onChange={(e) => setSurname(e.target.value)}/>
+			</div>
+			<div>
+				{index === 0 && <label htmlFor="actions">Akcje:</label>}
+				<button className={"last error"} onClick={removeUser} disabled={userListLength <= 1}>Usuń</button>
 			</div>
 		</div>
 	)
