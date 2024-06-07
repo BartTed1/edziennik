@@ -1,3 +1,5 @@
+import User from "@/classes/User";
+
 class Class {
 	id: number;
 	name: string;

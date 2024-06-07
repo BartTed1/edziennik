@@ -10,33 +10,3 @@
   &__pages
     display: flex
     justify-content: flex-end
-
-.modal
-  max-width: 700px
-  max-height: 90dvh
-  border: 1px solid $stroke
-  border-radius: 20px
-  background: #FFFFFF
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)
-  outline: none
-  flex-direction: column
-  gap: 20px
-  &[data-opened="true"]
-    display: flex
-  .navigation
-    align-self: flex-end
-  &__header
-    width: 100%
-    display: flex
-    justify-content: space-between
-    h2, p
-      margin: 0
-    svg
-      cursor: pointer
-      transition-duration: 200ms
-      &:hover
-        transform: scale(1.1)
-  form
-    display: flex
-    flex-direction: column
-    gap: 1px
