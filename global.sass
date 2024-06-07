@@ -87,7 +87,7 @@ input
 .button-set
   display: flex
   gap: 1px
-  button, select, input
+  button, select, input, .info
     border-radius: 2px
   button:first-child, .first
     border-top-left-radius: 10px
@@ -103,6 +103,17 @@ input
     border-bottom-left-radius: 2px !important
   .only
     border-radius: 10px
+  .info
+    background: $background
+    border: 1px solid $stroke
+    color: $onBackground
+    display: flex
+    align-items: center
+    justify-content: center
+    width: auto
+    padding: 0 5px
+    font-size: 0.8rem
+
   svg
     transform: translateY(-1px) scale(0.8)
   label

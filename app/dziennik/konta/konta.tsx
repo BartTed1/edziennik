@@ -59,6 +59,7 @@ export default function Konta() {
 	}, [page, role])
 
 	const saveNewAccounts = async () => {
+		setIsAddModalDisabled(true);
 		const requestedUsers = newUsersList.map(wrapper => {
 			const user = wrapper.user;
 			return {
@@ -86,6 +87,9 @@ export default function Konta() {
 			const data = await response.json();
 			if (data) {
 				createAndDownloadCredentialListTxt(data);
+				setIsAddModalDisabled(false);
+				setIsAddModalOpened(false);
+				setNewUsersList([{tempId: 0, user: User.empty()}]);
 			}
 		} catch (e) {
 			console.error(e);
@@ -178,7 +182,7 @@ export default function Konta() {
 							fill="#081234"/>
 					</svg>
 				</div>
-				<form action="">
+				<form>
 					{
 						classes === null ? <div>Ładowanie listy klas...</div> : newUsersList.map((user, index) => (
 							<NewUserFormElements classes={classes} key={user.tempId} index={index} user={user} modifyCallback={setNewUsersList} userListLength={newUsersList.length}/>
@@ -189,7 +193,11 @@ export default function Konta() {
 				<div className="navigation">
 					<div className="button-set">
 						<button onClick={addAccount}>Dodaj następne konto</button>
-						<button className={"primary"} onClick={saveNewAccounts} disabled={isAddModalDisabled}>Zapisz</button>
+						<button className={"primary"} onClick={saveNewAccounts} disabled={
+							isAddModalDisabled ||
+							classes === null ||
+							newUsersList.some(user => user.user.role === "" || user.user.imie === "" || user.user.nazwisko === "")
+						}>Zapisz</button>
 					</div>
 				</div>
 			</dialog>
@@ -219,7 +227,7 @@ export default function Konta() {
 												<th>Imię</th>
 												<th>Nazwisko</th>
 												<th>Klasa</th>
-												<th style={{width: "1%", whiteSpace: "nowrap"}}>Akcje</th>
+												{/*<th style={{width: "1%", whiteSpace: "nowrap"}}>Akcje</th>*/}
 											</tr>
 											</thead>
 											<tbody>
@@ -239,9 +247,7 @@ export default function Konta() {
 																			"-"
 																}
 															</td>
-															<td>
-																<button>Edytuj</button>
-															</td>
+																{/*<td><button>Edytuj</button></td>*/}
 														</tr>
 													)
 												)
@@ -296,22 +302,21 @@ function Navigation({
 				</div>
 			</div>
 			<div className="button-set navigation__pages">
-				{
-					page > 0 && (
-						<button onClick={() => {
-							setPage(prevState => prevState - 1)
-						}}>
-							<svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M7.41 10.59L2.83 6L7.41 1.41L6 0L0 6L6 12L7.41 10.59Z" fill="#081234"/>
-							</svg>
-							Poprzednia strona
-						</button>
-					)
-				}
+					<button disabled={page <= 0} onClick={() => {
+						setPage(prevState => prevState - 1)
+					}}>
+						<svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7.41 10.59L2.83 6L7.41 1.41L6 0L0 6L6 12L7.41 10.59Z" fill="#081234"/>
+						</svg>
+						Poprzednia
+					</button>
+				<p className={"info"}>
+					{page + 1}
+				</p>
 				<button disabled={isNull} onClick={() => {
 					setPage(prevState => prevState + 1)
 				}}>
-					Następna strona
+					Następna
 					<svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M0.59 1.41L5.17 6L0.59 10.59L2 12L8 6L2 0L0.59 1.41Z" fill="#081234"/>
 					</svg>
