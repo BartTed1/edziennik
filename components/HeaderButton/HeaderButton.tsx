@@ -14,8 +14,12 @@ function HeaderButton({
 }: Readonly<{ title: string, icon: string, filledIcon: string, active: string, changePathCallback: Dispatch<SetStateAction<string>> }>) {
 	const router = useRouter()
 
+	const normalize = (str: string) => {
+		return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+	}
+
 	return (
-		<Link href={`/dziennik/${title.toLowerCase()}`} passHref>
+		<Link href={`/dziennik/${normalize(title).toLowerCase()}`} passHref>
 			<button
 				onClick={() => {
 					changePathCallback(title);

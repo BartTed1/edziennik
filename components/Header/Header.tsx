@@ -13,6 +13,8 @@ import kontaOutlined from "@/assets/icons/outlined/konta.svg"
 import kontaFilled from "@/assets/icons/filled/konta.svg"
 import klasyOutlined from "@/assets/icons/outlined/klasy.svg"
 import klasyFilled from "@/assets/icons/filled/klasy.svg"
+import aktualnosciOutlined from "@/assets/icons/outlined/aktualnosci.svg"
+import aktualnosciFilled from "@/assets/icons/filled/aktualnosci.svg"
 import {useEffect, useRef, useState} from "react";
 import Link from "next/link";
 
@@ -63,6 +65,7 @@ function Header() {
 						<>
 							<HeaderButton title="Konta" icon={kontaOutlined} filledIcon={kontaFilled} active={activeMenu} changePathCallback={setActiveMenu}/>
 							<HeaderButton title="Klasy" icon={klasyOutlined} filledIcon={klasyFilled} active={activeMenu} changePathCallback={setActiveMenu} />
+							<HeaderButton title={"Aktualności"} icon={aktualnosciOutlined} filledIcon={aktualnosciFilled} active={activeMenu} changePathCallback={setActiveMenu} />
 						</>) : role === "teacher" ? (
 						<>
 							<HeaderButton title="Lekcje" icon={lekcjeOutlined} filledIcon={lekcjeFilled} active={activeMenu} changePathCallback={setActiveMenu} />
