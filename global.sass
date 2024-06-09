@@ -43,10 +43,14 @@ main
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)
   display: flex
   flex-direction: column
-  gap: 20px
+  gap: $paddingLarge
   padding: $paddingLarge
   @media (width < 700px)
     padding: $paddingSmall
+    gap: $paddingSmall
+    border-radius: 15px
+    h1
+      font-size: 1.5rem
   h1, p
     margin: 0
 
@@ -70,7 +74,7 @@ main
     opacity: 0.5
     cursor: not-allowed
 
-input
+input, .input
   &:not(:disabled):hover
     border: 1px solid darken($tint, 60%)
     background: $background
@@ -93,20 +97,42 @@ input
 .button-set
   display: flex
   gap: 1px
+  @media (width < 700px)
+    flex-direction: column
+    width: 100%
+  &--keep-row
+    @extend .button-set
+    flex-direction: row
+    @media (width < 700px)
+      flex-direction: row
   button, select, input, .info
     border-radius: 2px
+    @media (width < 700px)
+      min-height: 35px
+      width: 100%
   button:first-child, .first
-    border-top-left-radius: 10px
-    border-bottom-left-radius: 10px
+    @media (width > 700px)
+      border-top-left-radius: 10px
+      border-bottom-left-radius: 10px
+    @media (width < 700px)
+      border-top-left-radius: 10px
+      border-top-right-radius: 10px
   .first
     border-top-right-radius: 2px
     border-bottom-right-radius: 2px
   button:last-child, .last
-    border-top-right-radius: 10px
-    border-bottom-right-radius: 10px
+    @media (width > 700px)
+      border-top-right-radius: 10px
+      border-bottom-right-radius: 10px
+    @media (width < 700px)
+      border-bottom-left-radius: 10px
+      border-bottom-right-radius: 10px
   .last
     border-top-left-radius: 2px !important
     border-bottom-left-radius: 2px !important
+    @media (width < 700px)
+      border-bottom-left-radius: 10px !important
+      border-bottom-right-radius: 10px !important
   .only
     border-radius: 10px
   .info
@@ -173,7 +199,7 @@ dialog
   width: 100%
 
 .modal
-  max-width: 700px
+  max-width: calc(100dvw - 20px)
   max-height: 90dvh
   border: 1px solid $stroke
   border-radius: 20px
