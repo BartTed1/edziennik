@@ -9,7 +9,8 @@ class User {
 		public studentclass: any = null,
 		public subjects: any[] | null = null,
 		public grades: any[] | null = null,
-		public password: string | null = null
+		public password: string | null = null,
+		public birthDate: string | null = null
 	) {
 		this.id = id;
 		this.role = role;
@@ -21,6 +22,7 @@ class User {
 		this.subjects = subjects;
 		this.grades = grades;
 		this.password = password;
+		this.birthDate = birthDate;
 	}
 
 	static empty(id: number = 0) {

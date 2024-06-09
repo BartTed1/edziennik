@@ -227,6 +227,7 @@ export default function Konta() {
 												<th>Imię</th>
 												<th>Nazwisko</th>
 												<th>Klasa</th>
+												<th>Data urodzenia</th>
 												{/*<th style={{width: "1%", whiteSpace: "nowrap"}}>Akcje</th>*/}
 											</tr>
 											</thead>
@@ -247,7 +248,12 @@ export default function Konta() {
 																			"-"
 																}
 															</td>
-																{/*<td><button>Edytuj</button></td>*/}
+															<td>
+																{
+																account.birthDate ? account.birthDate : "-"
+																}
+															</td>
+															{/*<td><button>Edytuj</button></td>*/}
 														</tr>
 													)
 												)
@@ -265,27 +271,22 @@ export default function Konta() {
 	);
 }
 
-function Navigation({
-	page,
-	setPage,
-	role,
-	setRole,
-	isNull,
-	setIsModalOpened
-} : {
-	page: number,
-	setPage: Dispatch<SetStateAction<number>>,
-	role: string,
-	setRole: Dispatch<SetStateAction<string>>,
-	isNull: boolean,
-	setIsModalOpened: Dispatch<SetStateAction<boolean>>
-}) {
+interface NavigationProps {
+	page: number;
+	setPage: Dispatch<SetStateAction<number>>;
+	role: string;
+	setRole: Dispatch<SetStateAction<string>>;
+	isNull: boolean;
+	setIsModalOpened: Dispatch<SetStateAction<boolean>>;
+}
+
+function Navigation({page, setPage, role, setRole, isNull, setIsModalOpened} : NavigationProps) {
 	return (
 		<div className="navigation">
 			<div className="button-set">
 				<button className={"button"} onClick={() => setIsModalOpened(true)}>Dodaj konto/a</button>
 			</div>
-			<div className="button-set">
+			<div className="button-set--keep-row">
 				<div>
 					<label htmlFor="filter">
 						Typ konta:
@@ -331,12 +332,16 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 	const [classId, setClassId] = useState(0);
 	const [name, setName] = useState("");
 	const [surname, setSurname] = useState("");
+	const [birthDate, setBirthDate] = useState("");
+	const [windowSize, setWindowSize] = useState(0);
 
 	useEffect(() => {
 		setRole(user.user.role);
 		setClassId(user.user.studentclass?.id || 0);
 		setName(user.user.imie);
 		setSurname(user.user.nazwisko);
+		if (typeof window === 'undefined') return;
+		setWindowSize(window.innerWidth);
 	}, [])
 
 	useEffect(() => {
@@ -376,11 +381,12 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 	return (
 		<div className="button-set" data-user-id={user.tempId}>
 			<div>
+				{windowSize < 700 ? <hr /> : null}
 				{index === 0 && <label htmlFor="Lp.">Lp.</label>}
 				<p id={"lp"}>{index + 1}</p>
 			</div>
 			<div>
-				{index === 0 && <label htmlFor="">Typ konta:</label>}
+				{index === 0 || windowSize < 700 ? <label htmlFor="">Typ konta:</label> : null}
 				<select className={"select first"} value={role} onChange={(e) => setRole(e.target.value)}>
 					<option disabled={true} hidden={true} value="">Wybierz</option>
 					<option value="STUDENT">Uczeń</option>
@@ -389,8 +395,9 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 			</div>
 			<div>
 				<div>
-					{index === 0 && <label htmlFor="class">Klasa:</label>}
-					<select className={"select"} id={"class"} value={classId} onChange={e => setClassId(parseInt(e.target.value))}>
+					{index === 0 || windowSize < 700 ? <label htmlFor="class">Klasa:</label> : null}
+					<select className={"select"} id={"class"} value={classId}
+									onChange={e => setClassId(parseInt(e.target.value))}>
 						<option value="null">-</option>
 						{
 							classes?.map((c, index) => (
@@ -401,15 +408,21 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 				</div>
 			</div>
 			<div>
-				{index === 0 && <label htmlFor="name">Imie:</label>}
-				<input className={"input"} type="text" id={"name"} value={name} onChange={(e) => setName(e.target.value)}/>
+				{index === 0 || windowSize < 700 ? <label htmlFor="name">Imie:</label> : null}
+				<input placeholder={"imie"} className={"input"} type="text" id={"name"} value={name} onChange={(e) => setName(e.target.value)}/>
 			</div>
 			<div>
-				{index === 0 && <label htmlFor="surname">Nazwisko:</label>}
-				<input className={"input"} type="text" id={"surname"} value={surname} onChange={(e) => setSurname(e.target.value)}/>
+				{index === 0 || windowSize < 700 ? <label htmlFor="surname">Nazwisko:</label> : null}
+				<input placeholder={"nazwisko"} className={"input"} type="text" id={"surname"} value={surname}
+							 onChange={(e) => setSurname(e.target.value)}/>
 			</div>
 			<div>
-				{index === 0 && <label htmlFor="actions">Akcje:</label>}
+				{index === 0 || windowSize < 700 ? <label htmlFor="birthDate">Data urodzenia:</label> : null}
+				<input placeholder={"data urodzenia"} className={"input"} type="date" id={"birthDate"} value={birthDate}
+							 onChange={(e) => setBirthDate(e.target.value)}/>
+			</div>
+			<div>
+				{index === 0 || windowSize < 700 ? <label htmlFor="actions">Akcje:</label> : null}
 				<button className={"button last error"} onClick={removeUser} disabled={userListLength <= 1}>Usuń</button>
 			</div>
 		</div>
