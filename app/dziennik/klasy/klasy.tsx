@@ -10,6 +10,7 @@ export default function Klasy() {
 	const [selectedClassName, setSelectedClassName] = useState("")
 	const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false)
 	const [isChangeClassNameModalOpen, setIsChangeClassNameModalOpen] = useState(false)
+	const [isCreateNewClassModalOpen, setIsCreateNewClassModalOpen] = useState(false)
 
 	const fetchClasses = useCallback(async () => {
 		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/class`, {
@@ -41,6 +42,7 @@ export default function Klasy() {
 			<ChangeSupervisorModal isOpen={isChangeSupervisorModalOpen} setIsOpen={setIsChangeSupervisorModalOpen} classId={selectedClassId} className={selectedClassName} fetchClasses={fetchClasses}/>
 			<AddStudentModal isOpen={isAddStudentModalOpen} setIsOpen={setIsAddStudentModalOpen} classId={selectedClassId} fetchClasses={fetchClasses}/>
 			<ChangeClassNameModal isOpen={isChangeClassNameModalOpen} setIsOpen={setIsChangeClassNameModalOpen} classId={selectedClassId} className={selectedClassName} fetchClasses={fetchClasses}/>
+			<CreateNewClassModal isOpen={isCreateNewClassModalOpen} setIsOpen={setIsCreateNewClassModalOpen} fetchClasses={fetchClasses}/>
 			<h1>Klasy</h1>
 			{
 				classes === null ? <p>Trwa ładowanie...</p> :
@@ -67,6 +69,7 @@ export default function Klasy() {
 												<th>ID</th>
 												<th>Imię ucznia</th>
 												<th>Nazwisko</th>
+												<th>Data urodzenia</th>
 											</tr>
 											</thead>
 											<tbody>
@@ -111,7 +114,7 @@ export default function Klasy() {
 					)
 			}
 			<div className="button-set" style={{alignSelf: "flex-end"}}>
-				<button className="button">
+				<button className="button" onClick={() => setIsCreateNewClassModalOpen(true)}>
 					Dodaj klasę
 				</button>
 			</div>
@@ -204,7 +207,7 @@ function ChangeSupervisorModal({isOpen, setIsOpen, classId, className, fetchClas
 			<form>
 				{
 					teachers === null ? <p>Trwa ładowanie...</p> :
-						teachers.length === 0 ? <p>Brak dostępnych nauczycieli</p> : (
+						teachers.length === 0 ? <p>Brak dostępnych nauczycieli, ich konta utworzysz w module &ldquo;Konta&rdquo;</p> : (
 							<div className="button-set w100">
 								<div className={"w100"}>
 									<label htmlFor="teacher">Nowy wychowawca:</label>
@@ -221,7 +224,7 @@ function ChangeSupervisorModal({isOpen, setIsOpen, classId, className, fetchClas
 						)
 				}
 			</form>
-			<button className={"button primary"} disabled={teachers === null} type={"submit"} onClick={changeSupervisior}>Zapisz</button>
+			<button className={"button primary"} disabled={teachers === null || !teachers.length} type={"submit"} onClick={changeSupervisior}>Zapisz</button>
 		</dialog>
 	)
 }
@@ -311,7 +314,7 @@ function AddStudentModal({isOpen, setIsOpen, classId, fetchClasses}: AddStudentM
 			<form>
 				{
 					students === null ? <p>Trwa ładowanie...</p> :
-						students.length === 0 ? <p>Brak dostępnych uczniów</p> : (
+						students.length === 0 ? <p>Brak dostępnych uczniów, ich konta utworzysz w module &ldquo;Konta&rdquo;.</p> : (
 							<div className="button-set w100">
 								<div className={"w100"}>
 									<label htmlFor="teacher">Nowy uczeń:</label>
@@ -379,7 +382,7 @@ function ChangeClassNameModal({isOpen, setIsOpen, classId, className, fetchClass
 			},
 			body: JSON.stringify({
 				name: newClassName,
-				supervising: { id: classSupervisor?.id }
+				supervising: classSupervisor === null ? null : {id: classSupervisor.id}
 			})
 		})
 		if (!response.ok) {
@@ -432,6 +435,83 @@ function ChangeClassNameModal({isOpen, setIsOpen, classId, className, fetchClass
 				onClick={changeClassName}
 			>
 				Zapisz
+			</button>
+		</dialog>
+	)
+}
+
+interface CreateNewClassModalProps {
+	isOpen: boolean,
+	setIsOpen: (value: boolean) => void,
+	fetchClasses: () => void
+}
+
+function CreateNewClassModal({isOpen, setIsOpen, fetchClasses}: CreateNewClassModalProps) {
+	const dialogRef = useRef<HTMLDialogElement>(null)
+	const [className, setClassName] = useState("")
+	const [isSubmitLocked, setIsSubmitLocked] = useState(false)
+
+	const createClass = async () => {
+		setIsSubmitLocked(true)
+		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/class`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${localStorage.getItem("token")}`
+			},
+			body: JSON.stringify({
+				name: className,
+				supervising: null
+			})
+		})
+		if (!response.ok) {
+			console.error("Error creating class")
+			setIsSubmitLocked(false)
+			return
+		}
+		fetchClasses()
+		setIsOpen(false)
+		setIsSubmitLocked(false)
+	}
+
+	useEffect(() => {
+		if (!dialogRef.current) return
+		if (isOpen) {
+			dialogRef.current.showModal()
+		} else {
+			dialogRef.current.close()
+		}
+	}, [isOpen]);
+
+	return (
+		<dialog className={"modal"} ref={dialogRef} data-opened={isOpen}>
+			<div className="modal__header">
+				<div>
+					<h2>Utwórz nową klasę</h2>
+					<p>Wprowadź nazwę klasy.</p>
+				</div>
+				<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+						 onClick={() => setIsOpen(false)}>
+					<path
+						d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+						fill="#081234"/>
+				</svg>
+			</div>
+			<form>
+				<div className="button-set w100">
+					<div className={"w100"}>
+						<label htmlFor="class-name">Nazwa klasy:</label>
+						<input id={"class-name"} className={"input only w100"} type="text" value={className} onChange={e => 		setClassName(e.target.value)}/>
+					</div>
+				</div>
+			</form>
+			<button
+				className={"button primary"}
+				disabled={isSubmitLocked || className === ""}
+				type={"submit"}
+				onClick={createClass}
+			>
+				Utwórz
 			</button>
 		</dialog>
 	)

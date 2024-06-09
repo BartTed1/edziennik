@@ -67,7 +67,8 @@ export default function Konta() {
 				imie: user.imie,
 				nazwisko: user.nazwisko,
 				studentclass: user.studentclass ? {id: user.studentclass.id} : null,
-				supervisingClass: user.supervisingClass ? {id: user.supervisingClass.id} : null
+				supervisingClass: user.supervisingClass ? {id: user.supervisingClass.id} : null,
+				birthDate: user.birthDate
 			}
 		});
 
@@ -86,9 +87,10 @@ export default function Konta() {
 			}
 			const data = await response.json();
 			if (data) {
+				fetchAccounts();
 				createAndDownloadCredentialListTxt(data);
-				setIsAddModalDisabled(false);
 				setIsAddModalOpened(false);
+				setIsAddModalDisabled(false);
 				setNewUsersList([{tempId: 0, user: User.empty()}]);
 			}
 		} catch (e) {
@@ -196,7 +198,7 @@ export default function Konta() {
 						<button className={"button primary"} onClick={saveNewAccounts} disabled={
 							isAddModalDisabled ||
 							classes === null ||
-							newUsersList.some(user => user.user.role === "" || user.user.imie === "" || user.user.nazwisko === "")
+							newUsersList.some(user => user.user.role === "" || user.user.imie === "" || user.user.nazwisko === "" || (user.user.birthDate === "" && user.user.role === "STUDENT"))
 						}>Zapisz</button>
 					</div>
 				</div>
@@ -333,7 +335,7 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 	const [name, setName] = useState("");
 	const [surname, setSurname] = useState("");
 	const [birthDate, setBirthDate] = useState("");
-	const [windowSize, setWindowSize] = useState(0);
+	const [windowSize, setWindowSize] = useState(800);
 
 	useEffect(() => {
 		setRole(user.user.role);
@@ -366,6 +368,7 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 					}
 					wrapper.user.imie = name;
 					wrapper.user.nazwisko = surname;
+					wrapper.user.birthDate = birthDate;
 				}
 			});
 			return newState;
@@ -381,8 +384,7 @@ function NewUserFormElements({classes, user, index, modifyCallback, userListLeng
 	return (
 		<div className="button-set" data-user-id={user.tempId}>
 			<div>
-				{windowSize < 700 ? <hr /> : null}
-				{index === 0 && <label htmlFor="Lp.">Lp.</label>}
+				{index === 0 || windowSize < 700 ? <label htmlFor="Lp.">Lp.</label> : null}
 				<p id={"lp"}>{index + 1}</p>
 			</div>
 			<div>
