@@ -7,6 +7,7 @@ import loading from "@/assets/icons/universal/loading.svg";
 import Loading from "@/components/Loading/Loading";
 import useRole from "@/utils/useRole";
 import {UserType} from "@/types/types";
+import StatusModal from "@/components/StatusModal/StatusModal";
 
 export default function Aktualnosci() {
 	const isAdmin = useRole(UserType.ADMIN)
@@ -17,6 +18,9 @@ export default function Aktualnosci() {
 	const [selectedNewsId, setSelectedNewsId] = useState<number | null>(null)
 	const [isRemoveModalVisible, setIsRemoveModalVisible] = useState(false)
 	const [isCreateModalVisible, setIsCreateModalVisible] = useState(false)
+	const [isStatusModalVisible, setIsStatusModalVisible] = useState(false)
+	const [statusMessage, setStatusMessage] = useState("")
+	const [statusType, setStatusType] = useState<"success" | "error">("success")
 
 	const getNews = useCallback(async () => {
 		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news?sort=created,desc`, {
@@ -76,12 +80,17 @@ export default function Aktualnosci() {
 		setNews([...news, ...data.content])
 	}
 
-
+	const openStatusModal = (message: string, status: string) => {
+		setStatusMessage(message)
+		setStatusType(status as "success" | "error")
+		setIsStatusModalVisible(true)
+	}
 
 	return (
 		<div className={"container aktualnosci"}>
-			<RemoveModal id={selectedNewsId} isVisible={isRemoveModalVisible} setIsVisible={setIsRemoveModalVisible} fetchNews={getNews}/>
-			<CreateNewsModal isVisible={isCreateModalVisible} setIsVisible={setIsCreateModalVisible} fetchNews={getNews}/>
+			<StatusModal isVisible={isStatusModalVisible} setIsVisible={setIsStatusModalVisible} message={statusMessage} status={statusType}/>
+			<RemoveModal id={selectedNewsId} isVisible={isRemoveModalVisible} setIsVisible={setIsRemoveModalVisible} fetchNews={getNews} openStatus={openStatusModal}/>
+			<CreateNewsModal isVisible={isCreateModalVisible} setIsVisible={setIsCreateModalVisible} fetchNews={getNews} openStatus={openStatusModal}/>
 			<h1>Aktualności</h1>
 			{
 				isAdmin || isTeacher ? (
@@ -135,7 +144,7 @@ export default function Aktualnosci() {
 	)
 }
 
-function RemoveModal({id, isVisible, setIsVisible, fetchNews}: {id: number | null, isVisible: boolean, setIsVisible: (isVisible: boolean) => void, fetchNews: () => void}) {
+function RemoveModal({id, isVisible, setIsVisible, fetchNews, openStatus}: {id: number | null, isVisible: boolean, setIsVisible: (isVisible: boolean) => void, fetchNews: () => void, openStatus: (arg1: string, arg2: string) => void}) {
 	const [isRemoving, setIsRemoving] = useState(false)
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
@@ -150,11 +159,13 @@ function RemoveModal({id, isVisible, setIsVisible, fetchNews}: {id: number | nul
 		})
 		if (!response.ok) {
 			console.error(response.statusText)
+			openStatus("Wystąpił błąd podczas usuwania aktualności", "error")
 			return
 		}
 		fetchNews()
 		setIsRemoving(false)
 		setIsVisible(false)
+		openStatus("Pomyślnie usunięto aktualność", "success")
 	}
 
 	useEffect(() => {
@@ -178,7 +189,7 @@ function RemoveModal({id, isVisible, setIsVisible, fetchNews}: {id: number | nul
 	)
 }
 
-function CreateNewsModal({isVisible, setIsVisible, fetchNews}: {isVisible: boolean, setIsVisible: (isVisible: boolean) => void, fetchNews: () => void}) {
+function CreateNewsModal({isVisible, setIsVisible, fetchNews, openStatus}: {isVisible: boolean, setIsVisible: (isVisible: boolean) => void, fetchNews: () => void, openStatus: (arg1: string, arg2: string) => void}) {
 	const [isCreating, setIsCreating] = useState(false)
 	const dialogRef = useRef<HTMLDialogElement>(null)
 	const [tittle, setTittle] = useState("")
@@ -186,24 +197,31 @@ function CreateNewsModal({isVisible, setIsVisible, fetchNews}: {isVisible: boole
 
 	async function createNews() {
 		setIsCreating(true)
-		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${localStorage.getItem("token")}`
-			},
-			body: JSON.stringify({
-				tittle,
-				contents
+		try {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${localStorage.getItem("token")}`
+				},
+				body: JSON.stringify({
+					tittle,
+					contents
+				})
 			})
-		})
-		if (!response.ok) {
-			console.error(response.statusText)
-			return
+			if (!response.ok) {
+				console.error(response.statusText)
+				throw new Error()
+			}
+			fetchNews()
+			setIsCreating(false)
+			setIsVisible(false)
+			openStatus("Pomyślnie dodano aktualność", "success")
+		} catch (e) {
+			setIsCreating(false)
+			setIsVisible(false)
+			openStatus("Wystąpił błąd podczas dodawania aktualności", "error")
 		}
-		fetchNews()
-		setIsCreating(false)
-		setIsVisible(false)
 		setTittle("")
 		setContents("")
 	}

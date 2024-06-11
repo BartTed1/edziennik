@@ -57,11 +57,11 @@ function Header() {
 		}
 	}
 
-	function toggleMenu() {
+	function toggleMenu(e: React.MouseEvent<HTMLDivElement>) {
+		e.stopPropagation()
 		const nav = navRef.current
-		if (nav) {
-			nav.classList.toggle("header__nav--open")
-		}
+		if (!nav) return
+		nav.classList.toggle("header__nav--open")
 	}
 
 	function onAnchorInMenuClick() {
@@ -90,7 +90,7 @@ function Header() {
 					<Link href={"/dziennik"} onClick={() => setActiveMenu("Home")} className="header__logo">
 						<img src="" alt="eDziennik"/>
 					</Link>
-					<div className="header__nav__mobile-header__burger" onClick={toggleMenu}>
+					<div className="header__nav__mobile-header__burger">
 						<div className="header__nav__mobile-header__burger__line"></div>
 						<div className="header__nav__mobile-header__burger__line"></div>
 						<div className="header__nav__mobile-header__burger__line"></div>
@@ -127,7 +127,7 @@ function Header() {
 					</a>
 				</div>
 			</nav>
-			<div className="header__nav__mobile-header__burger" onClick={toggleMenu}>
+			<div className="header__nav__mobile-header__burger" onClick={e => toggleMenu(e)}>
 				<div className="header__nav__mobile-header__burger__line"></div>
 				<div className="header__nav__mobile-header__burger__line"></div>
 				<div className="header__nav__mobile-header__burger__line"></div>

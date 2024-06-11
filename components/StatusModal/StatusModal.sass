@@ -1,0 +1,36 @@
+@import @/global
+
+.status-modal
+  width: 300px
+  min-height: 70px
+  display: flex
+  justify-content: center
+  align-items: center
+  position: fixed
+  top: 20px
+  left: calc((100% - 300px) / 2)
+  background: white
+  border: 1px solid $stroke
+  border-radius: 10px
+  padding: 10px
+  z-index: 93
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2)
+  overflow: hidden
+  gap: 20px
+  &--hidden
+    display: none
+  progress
+    position: absolute
+    bottom: 0
+    left: 0
+    width: 100%
+    border-radius: 0
+    display: block
+    height: 8px
+    background: $primary
+    &::-webkit-progress-bar
+      background: white
+  progress[data-status="success"]::-webkit-progress-value
+    background: $primary
+  progress[data-status="error"]::-webkit-progress-value
+    background: $error
