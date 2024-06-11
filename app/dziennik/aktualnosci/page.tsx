@@ -94,11 +94,11 @@ export default function Aktualnosci() {
 						</div>
 						<p dangerouslySetInnerHTML={{__html: n.contents}}></p>
 					</div>
-				)) : <Loading />
+				)) : <Loading text={"Ładowanie"} />
 			}
 			{
 				isFetching ? (
-					<Loading />
+					<Loading text={"Ładowanie"} />
 				) : null
 			}
 		</div>

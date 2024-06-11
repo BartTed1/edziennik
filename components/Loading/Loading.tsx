@@ -1,6 +1,6 @@
 import "./Loading.sass"
 
-export default function Loading() {
+export default function Loading({text} : {text: string}) {
 	return (
 		<div className={"loading"}>
 			<svg className={"loading"} width="36" height="36" viewBox="0 0 24 24" fill="none"
@@ -16,7 +16,7 @@ export default function Loading() {
 					</clipPath>
 				</defs>
 			</svg>
-			Ładowanie
+			{text}
 		</div>
 	)
 }

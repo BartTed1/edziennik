@@ -5,6 +5,7 @@ import Class from "@/classes/Class";
 import User from "@/classes/User";
 import {remove} from "immutable";
 import {create} from "node:domain";
+import Loading from "@/components/Loading/Loading";
 
 interface UserWrapper {
 	tempId: number;
@@ -186,7 +187,7 @@ export default function Konta() {
 				</div>
 				<form>
 					{
-						classes === null ? <div>Ładowanie listy klas...</div> : newUsersList.map((user, index) => (
+						classes === null ? <Loading text={"Ładowanie listy kont"} /> : newUsersList.map((user, index) => (
 							<NewUserFormElements classes={classes} key={user.tempId} index={index} user={user} modifyCallback={setNewUsersList} userListLength={newUsersList.length}/>
 						))
 					}
@@ -210,7 +211,7 @@ export default function Konta() {
 					<>
 						<Navigation page={page} setPage={setPage} role={role} setRole={setRole} isNull={true}
 												setIsModalOpened={setIsAddModalOpened}/>
-						<div>Ładowanie...</div>
+						<Loading text={"Ładowanie listy kont"} />
 					</>
 				) : (
 					<>

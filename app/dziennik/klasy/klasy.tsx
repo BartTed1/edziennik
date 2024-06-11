@@ -2,6 +2,7 @@ import "./klasy.sass"
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import Class from "@/classes/Class";
 import User from "@/classes/User";
+import Loading from "@/components/Loading/Loading";
 
 export default function Klasy() {
 	const [classes, setClasses] = useState<Class[] | null>(null)
@@ -45,7 +46,7 @@ export default function Klasy() {
 			<CreateNewClassModal isOpen={isCreateNewClassModalOpen} setIsOpen={setIsCreateNewClassModalOpen} fetchClasses={fetchClasses}/>
 			<h1>Klasy</h1>
 			{
-				classes === null ? <p>Trwa ładowanie...</p> :
+				classes === null ? <Loading text={"Ładowanie listy klas"} /> :
 					classes.length === 0 ? <p>Brak klas</p> :
 						classes.map((c, index) => (
 							<details key={index} className={"details"}>
@@ -206,7 +207,7 @@ function ChangeSupervisorModal({isOpen, setIsOpen, classId, className, fetchClas
 			</div>
 			<form>
 				{
-					teachers === null ? <p>Trwa ładowanie...</p> :
+					teachers === null ? <Loading text={"Ładowanie listy nauczycieli"}/> :
 						teachers.length === 0 ? <p>Brak dostępnych nauczycieli, ich konta utworzysz w module &ldquo;Konta&rdquo;</p> : (
 							<div className="button-set w100">
 								<div className={"w100"}>
@@ -313,7 +314,7 @@ function AddStudentModal({isOpen, setIsOpen, classId, fetchClasses}: AddStudentM
 			</div>
 			<form>
 				{
-					students === null ? <p>Trwa ładowanie...</p> :
+					students === null ? <Loading text={"Ładowanie listy uczniów"}/> :
 						students.length === 0 ? <p>Brak dostępnych uczniów, ich konta utworzysz w module &ldquo;Konta&rdquo;.</p> : (
 							<div className="button-set w100">
 								<div className={"w100"}>
