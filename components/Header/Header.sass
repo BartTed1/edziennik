@@ -13,22 +13,107 @@
   margin-bottom: 10px
   transition-duration: 200ms
   z-index: 90
+  .header__nav__mobile-header__burger
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    &__line
+      width: 35px
+      height: 3px
+      background: black
+      margin: 4px 0
+    @media (min-width: 1100px)
+      display: none
   &--scrolled
     border-bottom: 1px solid $stroke
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)
   &__nav
     display: flex
     gap: 2px
+    &--bottom
+      @media (width > 1100px)
+        display: none
+    &__mobile-header
+      display: none
+    &-content
+      display: flex
+      gap: 2px
   &__logo
     font-size: 24px
     font-weight: 700
     color: black
   &__left
-    display: flex
-    gap: 20px
+    gap: 0 20px
     align-items: center
+    display: grid
+    grid-template-columns: auto auto
+    grid-template-rows: 1fr 1fr
+    grid-template-areas: "name logout" "role logout"
+    @media (max-width: 1100px)
+      display: none
   &__account
     display: flex
     gap: 10px
     align-items: center
+    &--name
+      grid-area: name
+      text-align: right
+      p
+        margin: 0
+        font-size: 1.2rem
+        font-weight: bold
+        text-transform: capitalize
+    &--role
+      grid-area: role
+      text-align: right
+      p
+        margin: 0
+        font-size: 0.8rem
+    &--logout
+      grid-area: logout
+      p
+        margin: 0
+  @media (max-width: 1100px)
+    position: relative
+    &__nav
+      position: fixed
+      top: 0
+      right: 0
+      display: flex
+      flex-direction: column
+      align-items: center
+      justify-content: space-between
+      gap: 10px
+      width: 100%
+      height: 100dvh
+      background: white
+      padding-bottom: 20px
+      transform: translateX(100%)
+      &-content
+        display: flex
+        flex-direction: column
+        gap: 10px
+      &--bottom
+        a
+          display: flex
+          justify-content: center
+          align-items: center
+          gap: 10px
+          color: $onBackground
+      &__mobile-header
+        display: flex
+        justify-content: space-between
+        align-items: center
+        width: 100%
+        padding: 20px
+        border-bottom: 1px solid $stroke
+        img
+          width: 100px
+    &__nav--open
+      transform: translateX(0)
+
+
+
 

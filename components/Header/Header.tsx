@@ -15,8 +15,11 @@ import klasyOutlined from "@/assets/icons/outlined/klasy.svg"
 import klasyFilled from "@/assets/icons/filled/klasy.svg"
 import aktualnosciOutlined from "@/assets/icons/outlined/aktualnosci.svg"
 import aktualnosciFilled from "@/assets/icons/filled/aktualnosci.svg"
+import logout from "@/assets/icons/universal/logout.svg"
 import {useEffect, useRef, useState} from "react";
 import Link from "next/link";
+import {Simulate} from "react-dom/test-utils";
+import toggle = Simulate.toggle;
 
 
 function Header() {
@@ -25,6 +28,7 @@ function Header() {
 	const [name, setName] = useState("")
 	const [surname, setSurname] = useState("")
 	const headerRef = useRef<HTMLElement | null>(null)
+	const navRef = useRef<HTMLElement | null>(null)
 
 	useEffect(() => {
 		if (typeof window === 'undefined') return
@@ -53,31 +57,81 @@ function Header() {
 		}
 	}
 
+	function toggleMenu() {
+		const nav = navRef.current
+		if (nav) {
+			nav.classList.toggle("header__nav--open")
+		}
+	}
+
+	function onAnchorInMenuClick() {
+		const nav = navRef.current
+		if (nav) {
+			nav.classList.remove("header__nav--open")
+		}
+	}
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return
+		const nav = navRef.current
+		if (nav) {
+			nav.addEventListener("click", onAnchorInMenuClick)
+		}
+	}, []);
+
 
   return (
 		<header className="header" ref={headerRef}>
 			<Link href={"/dziennik"} onClick={() => setActiveMenu("Home")} className="header__logo">
 				<img src="" alt="eDziennik"/>
 			</Link>
-			<nav className="header__nav">
-				{
-					role === "admin" ? (
-						<>
-							<HeaderButton title="Konta" icon={kontaOutlined} filledIcon={kontaFilled} active={activeMenu} changePathCallback={setActiveMenu}/>
-							<HeaderButton title="Klasy" icon={klasyOutlined} filledIcon={klasyFilled} active={activeMenu} changePathCallback={setActiveMenu} />
-							<HeaderButton title={"Aktualności"} icon={aktualnosciOutlined} filledIcon={aktualnosciFilled} active={activeMenu} changePathCallback={setActiveMenu} />
-						</>) : role === "teacher" ? (
-						<>
-							<HeaderButton title="Lekcje" icon={lekcjeOutlined} filledIcon={lekcjeFilled} active={activeMenu} changePathCallback={setActiveMenu} />
-							<HeaderButton title="Uczniowie" icon={uczniowieOutlined} filledIcon={uczniowieFilled} active={activeMenu} changePathCallback={setActiveMenu}/>
-						</>
-					) : role === "student" || role === "parent" ? (
-						<>
+			<nav className="header__nav" ref={navRef}>
+				<div className="header__nav__mobile-header">
+					<Link href={"/dziennik"} onClick={() => setActiveMenu("Home")} className="header__logo">
+						<img src="" alt="eDziennik"/>
+					</Link>
+					<div className="header__nav__mobile-header__burger" onClick={toggleMenu}>
+						<div className="header__nav__mobile-header__burger__line"></div>
+						<div className="header__nav__mobile-header__burger__line"></div>
+						<div className="header__nav__mobile-header__burger__line"></div>
+					</div>
+				</div>
+				<div className={"header__nav-content"}>
+					{
+						role === "admin" ? (
+							<>
+								<HeaderButton title="Konta" icon={kontaOutlined} filledIcon={kontaFilled} active={activeMenu}
+															changePathCallback={setActiveMenu}/>
+								<HeaderButton title="Klasy" icon={klasyOutlined} filledIcon={klasyFilled} active={activeMenu}
+															changePathCallback={setActiveMenu}/>
+								<HeaderButton title={"Aktualności"} icon={aktualnosciOutlined} filledIcon={aktualnosciFilled}
+															active={activeMenu} changePathCallback={setActiveMenu}/>
+							</>) : role === "teacher" ? (
+							<>
+								<HeaderButton title="Lekcje" icon={lekcjeOutlined} filledIcon={lekcjeFilled} active={activeMenu}
+															changePathCallback={setActiveMenu}/>
+								<HeaderButton title="Uczniowie" icon={uczniowieOutlined} filledIcon={uczniowieFilled}
+															active={activeMenu} changePathCallback={setActiveMenu}/>
+							</>
+						) : role === "student" || role === "parent" ? (
+							<>
 
-						</>
-					) : null
-				}
-				</nav>
+							</>
+						) : null
+					}
+				</div>
+				<div className="header__nav--bottom">
+					<a href="/login">
+						<Image src={logout} alt="Wyloguj"/>
+						<span>Wyloguj</span>
+					</a>
+				</div>
+			</nav>
+			<div className="header__nav__mobile-header__burger" onClick={toggleMenu}>
+				<div className="header__nav__mobile-header__burger__line"></div>
+				<div className="header__nav__mobile-header__burger__line"></div>
+				<div className="header__nav__mobile-header__burger__line"></div>
+			</div>
 			<div className="header__left">
 				<div className="header__account--name">
 					<p>{name} {surname}</p>
@@ -94,7 +148,9 @@ function Header() {
 					}
 				</div>
 				<div className="header__account--logout">
-					<a href="/login">Wyloguj</a>
+					<a href="/login">
+						<Image src={logout} alt="Wyloguj"/>
+					</a>
 				</div>
 			</div>
 		</header>
