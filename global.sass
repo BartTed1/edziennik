@@ -75,6 +75,31 @@ main
     opacity: 0.5
     cursor: not-allowed
 
+div[contenteditable="true"]
+  border: 1px solid $stroke
+  padding: 5px 10px
+  background: $background
+  cursor: text
+  border-radius: 10px
+  min-height: 30px
+  min-width: 60px
+  transition-duration: 100ms
+  &:not(:disabled):hover
+    border: 1px solid darken($tint, 60%)
+    background: $background
+  &:disabled
+    opacity: 0.5
+    cursor: not-allowed
+  &:focus
+    outline: 2px solid $tint
+
+.textarea
+  min-height: 200px
+  min-width: 300px
+  width: 100%
+  max-width: 600px
+  resize: vertical
+
 input, .input
   &:not(:disabled):hover
     border: 1px solid darken($tint, 60%)

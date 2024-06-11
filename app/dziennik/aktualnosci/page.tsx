@@ -10,11 +10,13 @@ import {UserType} from "@/types/types";
 
 export default function Aktualnosci() {
 	const isAdmin = useRole(UserType.ADMIN)
+	const isTeacher = useRole(UserType.TEACHER)
 
 	const [news, setNews] = useState<News[] | null>(null)
 	const [isFetching, setIsFetching] = useState(false)
 	const [selectedNewsId, setSelectedNewsId] = useState<number | null>(null)
 	const [isRemoveModalVisible, setIsRemoveModalVisible] = useState(false)
+	const [isCreateModalVisible, setIsCreateModalVisible] = useState(false)
 
 	const getNews = useCallback(async () => {
 		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news?sort=created,desc`, {
@@ -79,7 +81,15 @@ export default function Aktualnosci() {
 	return (
 		<div className={"container aktualnosci"}>
 			<RemoveModal id={selectedNewsId} isVisible={isRemoveModalVisible} setIsVisible={setIsRemoveModalVisible} fetchNews={getNews}/>
+			<CreateNewsModal isVisible={isCreateModalVisible} setIsVisible={setIsCreateModalVisible} fetchNews={getNews}/>
 			<h1>Aktualności</h1>
+			{
+				isAdmin || isTeacher ? (
+					<div className={"button-set"}>
+						<button className={"button"} onClick={() => setIsCreateModalVisible(true)}>Dodaj</button>
+					</div>
+				) : null
+			}
 			{
 				news ? news.length === 0 ? (
 					<p>Brak aktualności</p>
@@ -162,6 +172,77 @@ function RemoveModal({id, isVisible, setIsVisible, fetchNews}: {id: number | nul
 				<div className={"button-set"} style={{alignSelf: "flex-end"}}>
 					<button className={"button"} onClick={() => setIsVisible(false)}>Anuluj</button>
 					<button className={"button error"} onClick={removeNews}>Usuń</button>
+				</div>
+			</div>
+		</dialog>
+	)
+}
+
+function CreateNewsModal({isVisible, setIsVisible, fetchNews}: {isVisible: boolean, setIsVisible: (isVisible: boolean) => void, fetchNews: () => void}) {
+	const [isCreating, setIsCreating] = useState(false)
+	const dialogRef = useRef<HTMLDialogElement>(null)
+	const [tittle, setTittle] = useState("")
+	const [contents, setContents] = useState("")
+
+	async function createNews() {
+		setIsCreating(true)
+		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${localStorage.getItem("token")}`
+			},
+			body: JSON.stringify({
+				tittle,
+				contents
+			})
+		})
+		if (!response.ok) {
+			console.error(response.statusText)
+			return
+		}
+		fetchNews()
+		setIsCreating(false)
+		setIsVisible(false)
+		setTittle("")
+		setContents("")
+	}
+
+	useEffect(() => {
+		if (isVisible) {
+			dialogRef.current?.showModal()
+		} else {
+			dialogRef.current?.close()
+		}
+	}, [isVisible]);
+
+	return (
+		<dialog className={"modal"} ref={dialogRef}>
+			<div style={{display: "flex", flexDirection: "column", gap: "20px"}}>
+				<h2>Dodaj nową aktualność</h2>
+				<div className="button-set w100">
+					<div className={"w100"}>
+						<label htmlFor="title">
+							Tytuł
+						</label>
+						<input placeholder={"Tytuł"} className={"input w100 only"} type="text" id="title" value={tittle}
+									 onChange={(e) => setTittle(e.target.value)}/>
+					</div>
+				</div>
+				<div className="button-set w100">
+					<div className={"w100"}>
+						<label htmlFor="contents">
+							Treść
+						</label>
+						<div contentEditable={true} className={"textarea w100 only"} id="contents"
+							onInput={(e) => setContents((e.target as HTMLElement).innerHTML)}
+						>
+						</div>
+					</div>
+				</div>
+				<div className={"button-set"} style={{alignSelf: "flex-end"}}>
+					<button className={"button"} onClick={() => setIsVisible(false)}>Anuluj</button>
+					<button className={"button primary"} onClick={createNews} disabled={!(tittle && contents)}>Dodaj</button>
 				</div>
 			</div>
 		</dialog>
