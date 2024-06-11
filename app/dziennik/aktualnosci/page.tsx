@@ -1,14 +1,20 @@
 'use client'
 
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import News from "@/classes/News";
 import "./aktualnosci.sass";
 import loading from "@/assets/icons/universal/loading.svg";
 import Loading from "@/components/Loading/Loading";
+import useRole from "@/utils/useRole";
+import {UserType} from "@/types/types";
 
 export default function Aktualnosci() {
+	const isAdmin = useRole(UserType.ADMIN)
+
 	const [news, setNews] = useState<News[] | null>(null)
 	const [isFetching, setIsFetching] = useState(false)
+	const [selectedNewsId, setSelectedNewsId] = useState<number | null>(null)
+	const [isRemoveModalVisible, setIsRemoveModalVisible] = useState(false)
 
 	const getNews = useCallback(async () => {
 		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news?sort=created,desc`, {
@@ -68,8 +74,11 @@ export default function Aktualnosci() {
 		setNews([...news, ...data.content])
 	}
 
+
+
 	return (
 		<div className={"container aktualnosci"}>
+			<RemoveModal id={selectedNewsId} isVisible={isRemoveModalVisible} setIsVisible={setIsRemoveModalVisible} fetchNews={getNews}/>
 			<h1>Aktualności</h1>
 			{
 				news ? news.length === 0 ? (
@@ -93,14 +102,68 @@ export default function Aktualnosci() {
 							</span>
 						</div>
 						<p dangerouslySetInnerHTML={{__html: n.contents}}></p>
+						{
+							isAdmin ? (
+								<div className="button-set" style={{alignSelf: "flex-end"}}>
+									<button className="button" onClick={() => {
+										setSelectedNewsId(n.id)
+										setIsRemoveModalVisible(true)
+									}}>Usuń
+									</button>
+								</div>
+							) : null
+						}
 					</div>
-				)) : <Loading text={"Ładowanie"} />
+				)) : <Loading text={"Ładowanie"}/>
 			}
 			{
 				isFetching ? (
-					<Loading text={"Ładowanie"} />
+					<Loading text={"Ładowanie"}/>
 				) : null
 			}
 		</div>
+	)
+}
+
+function RemoveModal({id, isVisible, setIsVisible, fetchNews}: {id: number | null, isVisible: boolean, setIsVisible: (isVisible: boolean) => void, fetchNews: () => void}) {
+	const [isRemoving, setIsRemoving] = useState(false)
+	const dialogRef = useRef<HTMLDialogElement>(null)
+
+	async function removeNews() {
+		setIsRemoving(true)
+		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news/${id}`, {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${localStorage.getItem("token")}`
+			}
+		})
+		if (!response.ok) {
+			console.error(response.statusText)
+			return
+		}
+		fetchNews()
+		setIsRemoving(false)
+		setIsVisible(false)
+	}
+
+	useEffect(() => {
+		if (isVisible) {
+			dialogRef.current?.showModal()
+		} else {
+			dialogRef.current?.close()
+		}
+	}, [isVisible]);
+
+	return (
+		<dialog className={"modal"} ref={dialogRef}>
+			<h2>Czy na pewno chcesz usunąć tę aktualność?</h2>
+			<div style={{display: "flex", flexDirection: "column"}}>
+				<div className={"button-set"} style={{alignSelf: "flex-end"}}>
+					<button className={"button"} onClick={() => setIsVisible(false)}>Anuluj</button>
+					<button className={"button error"} onClick={removeNews}>Usuń</button>
+				</div>
+			</div>
+		</dialog>
 	)
 }
