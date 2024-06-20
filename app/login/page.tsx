@@ -70,7 +70,7 @@ export default function Login() {
 					<Input value={password} onValueChange={(e) => setPassword(e.target.value)} type={InputType.PASSWORD} name="password" required={true} placeholder="Wpisz hasło" />
 				</div>
 				{
-					response === null ? <p></p> : <p className="error">{response}</p>
+					response === null ? <p></p> : <p className="errors">{response}</p>
 				}
 				<Button type={ButtonType.SUBMIT} value="Zaloguj" disabled={logging || (login === "" || password === "")}/>
 			</form>
